@@ -1,0 +1,6 @@
+{
+  "name": "Everyday Holidays",
+  "description": "싱가포르 학생단체·MICE·기관연수 전문 현지 랜드사 - Singapore Group Travel & MICE Specialist",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
