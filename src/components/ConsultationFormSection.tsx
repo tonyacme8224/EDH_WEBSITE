@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Mail, MessageSquare, Copy, Check, ExternalLink, Sparkles, Phone, ShieldCheck, Building, Clock } from 'lucide-react';
-import { getWhatsAppLink, WHATSAPP_PHONE, WHATSAPP_DISPLAY_PHONE, WHATSAPP_BUTTON_TEXT, WHATSAPP_DEFAULT_MSG } from '../constants/whatsapp';
+import { Mail, MessageSquare, Copy, Check, ExternalLink, Sparkles, ShieldCheck, Building } from 'lucide-react';
+import { getWhatsAppLink, WHATSAPP_BUTTON_TEXT, WHATSAPP_DEFAULT_MSG } from '../constants/whatsapp';
 
 interface ConsultationFormSectionProps {
   initialInquiryType?: string;
@@ -24,18 +24,11 @@ export const ConsultationFormSection: React.FC<ConsultationFormSectionProps> = (
   });
 
   const [emailCopied, setEmailCopied] = useState(false);
-  const [phoneCopied, setPhoneCopied] = useState(false);
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText('acme8224@gmail.com');
+    navigator.clipboard.writeText('everyday.holidays.sg@gmail.com');
     setEmailCopied(true);
     setTimeout(() => setEmailCopied(false), 2500);
-  };
-
-  const handleCopyPhone = () => {
-    navigator.clipboard.writeText('01037260703');
-    setPhoneCopied(true);
-    setTimeout(() => setPhoneCopied(false), 2500);
   };
 
   const groupTypes = [
@@ -136,9 +129,6 @@ export const ConsultationFormSection: React.FC<ConsultationFormSectionProps> = (
                 <p className="text-xs text-slate-300 leading-relaxed">
                   모바일에서는 WhatsApp 앱으로, PC에서는 WhatsApp Web으로 즉시 연결되어 담당자와 1:1로 실시간 견적 및 일정을 상담받으실 수 있습니다.
                 </p>
-                <div className="pt-2 text-xs font-mono text-emerald-300 font-bold">
-                  연결 번호: {WHATSAPP_DISPLAY_PHONE}
-                </div>
               </div>
 
               <div>
@@ -169,7 +159,7 @@ export const ConsultationFormSection: React.FC<ConsultationFormSectionProps> = (
                   <div className="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-2">
                     <div className="min-w-0">
                       <div className="text-slate-400 font-medium text-[11px]">대표 이메일</div>
-                      <div className="text-white font-bold text-sm truncate">acme8224@gmail.com</div>
+                      <div className="text-white font-bold text-sm truncate">everyday.holidays.sg@gmail.com</div>
                     </div>
                     <button
                       type="button"
@@ -180,32 +170,16 @@ export const ConsultationFormSection: React.FC<ConsultationFormSectionProps> = (
                       <span>{emailCopied ? '복사됨' : '복사'}</span>
                     </button>
                   </div>
-
-                  {/* Phone row */}
-                  <div className="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="text-slate-400 font-medium text-[11px]">연결 및 담당 번호</div>
-                      <div className="text-white font-bold text-sm truncate">010-3726-0703</div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleCopyPhone}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 shrink-0 transition-colors flex items-center gap-1"
-                    >
-                      {phoneCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
-                      <span>{phoneCopied ? '복사됨' : '복사'}</span>
-                    </button>
-                  </div>
                 </div>
               </div>
 
               <div>
                 <a
-                  href="mailto:acme8224@gmail.com?subject=%5BEveryday%20Holidays%20B2B%20%EB%AC%B8%EC%9D%98%5D%20%EC%8B%B1%EA%B0%80%ED%8F%AC%EB%A5%B4%20%EB%8B%A8%EC%B2%B4%20%EC%83%81%EB%8B%B4%20%EB%B0%8F%20%EA%B2%AC%EC%A0%81%20%EC%9A%94%EC%B2%AD"
+                  href="mailto:everyday.holidays.sg@gmail.com?subject=%5BEveryday%20Holidays%20B2B%20%EB%AC%B8%EC%9D%98%5D%20%EC%8B%B1%EA%B0%80%ED%8F%AC%EB%A5%B4%20%EB%8B%A8%EC%B2%B4%20%EC%83%81%EB%8B%B4%20%EB%B0%8F%20%EA%B2%AC%EC%A0%81%20%EC%9A%94%EC%B2%AD"
                   className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm transition-colors shadow-lg"
                 >
                   <Mail className="w-4 h-4" />
-                  <span>이메일(acme8224@gmail.com) 바로 보내기</span>
+                  <span>이메일(everyday.holidays.sg@gmail.com) 바로 보내기</span>
                 </a>
               </div>
             </div>
