@@ -1,7 +1,8 @@
 import React from 'react';
 import { CORE_SERVICES } from '../data/contentData';
-import { CheckCircle2, ArrowRight, GraduationCap, Building2, Landmark } from 'lucide-react';
+import { CheckCircle2, ArrowRight, GraduationCap, Building2, Landmark, MessageSquare } from 'lucide-react';
 import { PageView, ServiceCategory } from '../types';
+import { getWhatsAppLink, WHATSAPP_BUTTON_TEXT } from '../constants/whatsapp';
 
 interface CoreServicesSectionProps {
   onSelectService: (service: ServiceCategory) => void;
@@ -113,13 +114,15 @@ export const CoreServicesSection: React.FC<CoreServicesSectionProps> = ({
                 >
                   자세히 보기
                 </button>
-                <button
-                  onClick={() => onOpenInquiry(service.title)}
-                  className="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs sm:text-sm font-extrabold py-3 px-3 rounded-xl shadow-lg transition-all text-center flex items-center justify-center gap-1"
+                <a
+                  href={getWhatsAppLink(`안녕하세요. Everyday Holidays 홈페이지에서 [${service.title}] 수배 상담 문의드립니다.`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 text-xs sm:text-sm font-black py-3 px-2 rounded-xl shadow-lg transition-all text-center flex items-center justify-center gap-1.5"
                 >
-                  <span>맞춤 일정 문의</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                  <MessageSquare className="w-3.5 h-3.5 fill-slate-950 text-slate-950 shrink-0" />
+                  <span>{WHATSAPP_BUTTON_TEXT}</span>
+                </a>
               </div>
 
             </div>

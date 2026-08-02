@@ -1,6 +1,7 @@
 import React from 'react';
 import { ServiceCategory } from '../types';
-import { X, CheckCircle2, ArrowRight, ShieldCheck, GraduationCap, Building2, Landmark } from 'lucide-react';
+import { X, CheckCircle2, ArrowRight, ShieldCheck, MessageSquare } from 'lucide-react';
+import { getWhatsAppLink, WHATSAPP_BUTTON_TEXT } from '../constants/whatsapp';
 
 interface DetailModalProps {
   service: ServiceCategory | null;
@@ -73,16 +74,16 @@ export const DetailModal: React.FC<DetailModalProps> = ({ service, onClose, onOp
           >
             닫기
           </button>
-          <button
-            onClick={() => {
-              onClose();
-              onOpenInquiry(service.title);
-            }}
-            className="bg-gradient-to-r from-red-600 to-amber-600 text-white font-extrabold text-xs px-6 py-3 rounded-xl shadow-lg transition-all flex items-center gap-1.5"
+          <a
+            href={getWhatsAppLink(`안녕하세요. Everyday Holidays 홈페이지에서 [${service.title}] 맞춤 수배 상담 문의드립니다.`)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className="bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-black text-xs px-6 py-3 rounded-xl shadow-lg transition-all flex items-center gap-1.5"
           >
-            <span>이 서비스 맞춤 일정 문의</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+            <MessageSquare className="w-4 h-4 fill-slate-950 text-slate-950 shrink-0" />
+            <span>{WHATSAPP_BUTTON_TEXT}</span>
+          </a>
         </div>
 
       </div>

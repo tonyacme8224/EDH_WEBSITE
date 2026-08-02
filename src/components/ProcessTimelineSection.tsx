@@ -1,6 +1,7 @@
 import React from 'react';
 import { PROCESS_STEPS } from '../data/contentData';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2, MessageSquare } from 'lucide-react';
+import { getWhatsAppLink, WHATSAPP_BUTTON_TEXT } from '../constants/whatsapp';
 
 interface ProcessTimelineSectionProps {
   onOpenInquiry: () => void;
@@ -64,12 +65,15 @@ export const ProcessTimelineSection: React.FC<ProcessTimelineSectionProps> = ({ 
           <p className="text-slate-300 text-sm mb-6 max-w-xl mx-auto">
             단체 조건과 희망 일정을 전달해 주시면 24시간 이내에 현지 가능 여부와 세부 가이드를 공유해 드립니다.
           </p>
-          <button
-            onClick={onOpenInquiry}
-            className="bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-extrabold text-base px-8 py-4 rounded-xl shadow-xl transition-all"
+          <a
+            href={getWhatsAppLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-black text-base px-8 py-4 rounded-xl shadow-xl transition-all transform hover:-translate-y-0.5"
           >
-            맞춤 일정 및 견적 요청하기
-          </button>
+            <MessageSquare className="w-5 h-5 fill-slate-950 stroke-slate-950" />
+            <span>{WHATSAPP_BUTTON_TEXT}</span>
+          </a>
         </div>
 
       </div>

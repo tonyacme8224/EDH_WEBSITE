@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { PageView } from '../types';
-import { Shield, Mail, MapPin, Phone, Building, ArrowUp } from 'lucide-react';
+import { Shield, Mail, MapPin, Phone, Building, ArrowUp, MessageSquare } from 'lucide-react';
 import { EverydayHolidaysLogo } from './Logo';
+import { getWhatsAppLink, WHATSAPP_BUTTON_TEXT, WHATSAPP_DISPLAY_PHONE } from '../constants/whatsapp';
 
 interface FooterProps {
   onNavigate: (view: PageView) => void;
@@ -70,15 +71,33 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenInquiry }) => 
             </ul>
           </div>
 
-          {/* Corporate Placeholders */}
+          {/* Corporate Placeholders & Direct Contact */}
           <div className="md:col-span-4 space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">현지 법인 및 사업자 정보</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">현지 법인 및 direct 상담 정보</h4>
             <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-2 text-[11px] text-slate-300 leading-relaxed">
-              <div><strong className="text-slate-400">회사/법인명:</strong> Everyday Holidays Pte. Ltd. (상세 법인명 관리자 설정 가능)</div>
+              <div><strong className="text-slate-400">회사/법인명:</strong> Everyday Holidays Pte. Ltd.</div>
+              <div><strong className="text-slate-400">대표 이메일:</strong> <a href="mailto:acme8224@gmail.com" className="text-blue-400 hover:underline">acme8224@gmail.com</a></div>
+              <div><strong className="text-slate-400">WhatsApp 실시간 상담:</strong> <a href={getWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="text-emerald-400 font-bold hover:underline">WhatsApp 바로가기 ({WHATSAPP_DISPLAY_PHONE})</a></div>
               <div><strong className="text-slate-400">현지 사업자 등록번호:</strong> [Singapore UEN - 관리자 설정 가능]</div>
-              <div><strong className="text-slate-400">관광 라이선스 번호:</strong> [STB Travel Agent License No. - 관리자 설정 가능]</div>
-              <div><strong className="text-slate-400">대표 이메일:</strong> acme8224@gmail.com</div>
-              <div><strong className="text-slate-400">싱가포르 현지 주소:</strong> Singapore Business District (상세 주소 설정 가능)</div>
+              <div><strong className="text-slate-400">관광 라이선스 번호:</strong> [STB Travel Agent License No.]</div>
+              <div><strong className="text-slate-400">싱가포르 현지 주소:</strong> Singapore Business District</div>
+            </div>
+            <div className="flex items-center gap-2 pt-1">
+              <a
+                href={getWhatsAppLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-extrabold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <MessageSquare className="w-3.5 h-3.5 fill-slate-950 text-slate-950" />
+                <span>{WHATSAPP_BUTTON_TEXT}</span>
+              </a>
+              <a
+                href="mailto:acme8224@gmail.com?subject=%5BEveryday%20Holidays%5D%20B2B%20%EC%83%81%EB%8B%B4%20%EB%AC%B8%EC%9D%98"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <span>대표 이메일 문의</span>
+              </a>
             </div>
           </div>
 

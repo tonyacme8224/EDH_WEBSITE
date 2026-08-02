@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { PageView } from '../types';
-import { Phone, Mail, Menu, X, Shield, ArrowRight, Building } from 'lucide-react';
+import { Mail, MessageSquare, Menu, X, Shield, ArrowRight, Building } from 'lucide-react';
 import { EverydayHolidaysLogo } from './Logo';
+import { getWhatsAppLink, WHATSAPP_BUTTON_TEXT, WHATSAPP_DISPLAY_PHONE } from '../constants/whatsapp';
 
 interface HeaderProps {
   activeView: PageView;
@@ -48,12 +49,22 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onNavigate, onOpenIn
             <span className="text-slate-500">|</span>
             <span className="text-slate-400">Singapore Group Travel & MICE Specialist</span>
           </div>
-          <div className="flex items-center space-x-6 text-slate-300">
+          <div className="flex items-center space-x-5 text-slate-300">
+            <a
+              href={getWhatsAppLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-extrabold transition-colors"
+            >
+              <MessageSquare className="w-3.5 h-3.5 fill-emerald-400" />
+              <span>{WHATSAPP_BUTTON_TEXT}</span>
+            </a>
+            <span className="text-slate-700">|</span>
             <a href="mailto:acme8224@gmail.com" className="flex items-center gap-1.5 hover:text-white transition-colors">
               <Mail className="w-3.5 h-3.5 text-blue-400" />
               acme8224@gmail.com
             </a>
-            <span className="text-slate-500">|</span>
+            <span className="text-slate-700">|</span>
             <button 
               onClick={() => onNavigate('admin')}
               className="flex items-center gap-1 hover:text-amber-400 text-slate-400 font-medium transition-colors"
@@ -109,23 +120,28 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onNavigate, onOpenIn
 
           {/* Right Action Button */}
           <div className="hidden sm:flex items-center space-x-3">
-            <button
-              onClick={onOpenInquiry}
-              className="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-lg hover:shadow-red-500/20 transition-all duration-200 flex items-center gap-2 border border-red-400/30 transform hover:-translate-y-0.5"
+            <a
+              href={getWhatsAppLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-extrabold text-sm px-5 py-2.5 rounded-xl shadow-lg hover:shadow-[#25D366]/20 transition-all duration-200 flex items-center gap-2 transform hover:-translate-y-0.5"
             >
-              <span>맞춤 일정 문의</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+              <MessageSquare className="w-4 h-4 fill-slate-950 stroke-slate-950" />
+              <span>{WHATSAPP_BUTTON_TEXT}</span>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center gap-2">
-            <button
-              onClick={onOpenInquiry}
-              className="sm:hidden bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-md"
+            <a
+              href={getWhatsAppLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sm:hidden bg-[#25D366] text-slate-950 text-xs font-black px-3 py-1.5 rounded-md flex items-center gap-1"
             >
-              문의하기
-            </button>
+              <MessageSquare className="w-3.5 h-3.5 fill-slate-950" />
+              <span>WhatsApp</span>
+            </a>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-slate-200 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
@@ -142,7 +158,7 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onNavigate, onOpenIn
           <div className="lg:hidden bg-slate-900 border-b border-slate-800 px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-fadeIn">
             <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 mb-3 text-xs text-slate-300 flex items-center justify-between">
               <span className="font-semibold text-amber-400">싱가포르 B2B 전문 랜드사</span>
-              <span className="text-slate-400">010-0000-0000</span>
+              <span className="text-slate-300 font-mono font-bold">{WHATSAPP_DISPLAY_PHONE}</span>
             </div>
             {navItems.map((item) => (
               <button
@@ -162,16 +178,16 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onNavigate, onOpenIn
               </button>
             ))}
             <div className="pt-3">
-              <button
-                onClick={() => {
-                  onOpenInquiry();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white text-center font-bold py-3.5 rounded-xl shadow-lg flex items-center justify-center gap-2"
+              <a
+                href={getWhatsAppLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 text-center font-black py-3.5 rounded-xl shadow-lg flex items-center justify-center gap-2"
               >
-                <span>맞춤 일정 문의하기</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+                <MessageSquare className="w-5 h-5 fill-slate-950" />
+                <span>{WHATSAPP_BUTTON_TEXT}</span>
+              </a>
             </div>
           </div>
         )}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { CUSTOM_SERVICES } from '../data/contentData';
-import { Compass, Hotel, Building2, ShieldCheck, Check, ArrowRight, Info } from 'lucide-react';
+import { Compass, Hotel, Building2, ShieldCheck, Check, ArrowRight, Info, MessageSquare } from 'lucide-react';
+import { getWhatsAppLink, WHATSAPP_BUTTON_TEXT } from '../constants/whatsapp';
 
 interface CustomOperationSectionProps {
   onOpenInquiry: () => void;
@@ -98,13 +99,15 @@ export const CustomOperationSection: React.FC<CustomOperationSectionProps> = ({ 
               </p>
             </div>
           </div>
-          <button
-            onClick={onOpenInquiry}
-            className="shrink-0 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-extrabold text-sm px-6 py-3.5 rounded-xl shadow-lg transition-all flex items-center gap-2 whitespace-nowrap"
+          <a
+            href={getWhatsAppLink('안녕하세요. Everyday Holidays 홈페이지에서 1:1 맞춤 수배 상담 문의드립니다.')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-black text-sm px-6 py-3.5 rounded-xl shadow-lg transition-all flex items-center gap-2 whitespace-nowrap"
           >
-            <span>1:1 맞춤 수배 문의</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+            <MessageSquare className="w-4 h-4 fill-slate-950 stroke-slate-950 shrink-0" />
+            <span>{WHATSAPP_BUTTON_TEXT}</span>
+          </a>
         </div>
 
       </div>

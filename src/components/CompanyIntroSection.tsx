@@ -1,6 +1,7 @@
 import React from 'react';
-import { Shield, CheckCircle2, Building, Globe, Users, ArrowRight } from 'lucide-react';
+import { Shield, CheckCircle2, Building, Globe, Users, ArrowRight, MessageSquare } from 'lucide-react';
 import { EverydayHolidaysLogo } from './Logo';
+import { getWhatsAppLink, WHATSAPP_BUTTON_TEXT } from '../constants/whatsapp';
 
 interface CompanyIntroSectionProps {
   onOpenInquiry: () => void;
@@ -59,13 +60,15 @@ export const CompanyIntroSection: React.FC<CompanyIntroSectionProps> = ({ onOpen
                 <Shield className="w-5 h-5 text-amber-400" />
                 <span className="text-xs sm:text-sm text-slate-300 font-semibold">소비자 대상 판매 없음 · 100% B2B 전용 현지 운영</span>
               </div>
-              <button
-                onClick={onOpenInquiry}
-                className="text-xs sm:text-sm font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 group"
+              <a
+                href={getWhatsAppLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 transition-all transform hover:scale-105"
               >
-                <span>B2B 견학 및 수배 상담</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
+                <MessageSquare className="w-4 h-4 fill-slate-950 stroke-slate-950" />
+                <span>{WHATSAPP_BUTTON_TEXT}</span>
+              </a>
             </div>
           </div>
 

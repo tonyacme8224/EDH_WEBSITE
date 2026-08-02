@@ -1,7 +1,8 @@
 import React from 'react';
 import { PageView } from '../types';
 import { CORE_SERVICES, CUSTOM_SERVICES, PRINCIPLES, TARGET_PARTNERS } from '../data/contentData';
-import { GraduationCap, Building2, Landmark, CheckCircle2, ArrowRight, Compass, ShieldCheck, Hotel, Users, MapPin } from 'lucide-react';
+import { GraduationCap, Building2, Landmark, CheckCircle2, ArrowRight, Compass, ShieldCheck, Hotel, Users, MapPin, MessageSquare } from 'lucide-react';
+import { getWhatsAppLink, WHATSAPP_BUTTON_TEXT } from '../constants/whatsapp';
 
 interface SubPageProps {
   onOpenInquiry: (inquiryType?: string) => void;
@@ -69,12 +70,15 @@ export const AboutView: React.FC<SubPageProps> = ({ onOpenInquiry, onNavigate })
         {/* Bottom CTA */}
         <div className="text-center bg-gradient-to-r from-blue-950 to-slate-900 p-8 rounded-3xl border border-slate-800">
           <h3 className="text-xl font-bold text-white mb-4">싱가포르 현지 파트너십이 필요하신가요?</h3>
-          <button
-            onClick={() => onOpenInquiry('B2B 파트너십 및 맞춤 일정')}
-            className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm px-8 py-4 rounded-xl shadow-xl transition-all"
+          <a
+            href={getWhatsAppLink('안녕하세요. Everyday Holidays 홈페이지에서 B2B 파트너십 및 수배 상담 문의드립니다.')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-black text-sm px-8 py-4 rounded-xl shadow-xl transition-all"
           >
-            B2B 파트너십 & 수배 문의하기
-          </button>
+            <MessageSquare className="w-4 h-4 fill-slate-950 text-slate-950 shrink-0" />
+            <span>{WHATSAPP_BUTTON_TEXT}</span>
+          </a>
         </div>
 
       </div>
@@ -115,12 +119,15 @@ export const StudentView: React.FC<SubPageProps> = ({ onOpenInquiry }) => {
         </div>
 
         <div className="text-center pt-4">
-          <button
-            onClick={() => onOpenInquiry('학생단체·수학여행')}
-            className="bg-gradient-to-r from-red-600 to-amber-600 text-white font-extrabold text-base px-10 py-4 rounded-2xl shadow-2xl"
+          <a
+            href={getWhatsAppLink('안녕하세요. Everyday Holidays 홈페이지에서 학생단체·수학여행 맞춤 수배 상담 문의드립니다.')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-black text-base px-10 py-4 rounded-2xl shadow-2xl"
           >
-            학생단체 맞춤 일정 문의하기
-          </button>
+            <MessageSquare className="w-5 h-5 fill-slate-950 text-slate-950 shrink-0" />
+            <span>{WHATSAPP_BUTTON_TEXT}</span>
+          </a>
         </div>
       </div>
     </div>
@@ -160,12 +167,15 @@ export const MiceView: React.FC<SubPageProps> = ({ onOpenInquiry }) => {
         </div>
 
         <div className="text-center pt-4">
-          <button
-            onClick={() => onOpenInquiry('MICE·기업행사')}
-            className="bg-gradient-to-r from-red-600 to-amber-600 text-white font-extrabold text-base px-10 py-4 rounded-2xl shadow-2xl"
+          <a
+            href={getWhatsAppLink('안녕하세요. Everyday Holidays 홈페이지에서 MICE·기업행사 맞춤 수배 상담 문의드립니다.')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-black text-base px-10 py-4 rounded-2xl shadow-2xl"
           >
-            MICE 맞춤 일정 및 수배 문의
-          </button>
+            <MessageSquare className="w-5 h-5 fill-slate-950 text-slate-950 shrink-0" />
+            <span>{WHATSAPP_BUTTON_TEXT}</span>
+          </a>
         </div>
       </div>
     </div>
@@ -209,12 +219,15 @@ export const InstitutionView: React.FC<SubPageProps> = ({ onOpenInquiry }) => {
         </div>
 
         <div className="text-center pt-4">
-          <button
-            onClick={() => onOpenInquiry('기관·대학 연수')}
-            className="bg-gradient-to-r from-red-600 to-amber-600 text-white font-extrabold text-base px-10 py-4 rounded-2xl shadow-2xl"
+          <a
+            href={getWhatsAppLink('안녕하세요. Everyday Holidays 홈페이지에서 기관·대학 연수 맞춤 수배 상담 문의드립니다.')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-black text-base px-10 py-4 rounded-2xl shadow-2xl"
           >
-            기관 연수 맞춤 수배 문의
-          </button>
+            <MessageSquare className="w-5 h-5 fill-slate-950 text-slate-950 shrink-0" />
+            <span>{WHATSAPP_BUTTON_TEXT}</span>
+          </a>
         </div>
       </div>
     </div>
@@ -252,12 +265,15 @@ export const ServicesView: React.FC<SubPageProps> = ({ onOpenInquiry }) => {
         </div>
 
         <div className="text-center pt-8">
-          <button
-            onClick={() => onOpenInquiry('맞춤 일정 및 견적')}
-            className="bg-gradient-to-r from-red-600 to-amber-600 text-white font-extrabold text-base px-10 py-4 rounded-2xl shadow-2xl"
+          <a
+            href={getWhatsAppLink('안녕하세요. Everyday Holidays 홈페이지에서 맞춤 운영 서비스 수배 상담 문의드립니다.')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-black text-base px-10 py-4 rounded-2xl shadow-2xl"
           >
-            맞춤 일정 신청하기
-          </button>
+            <MessageSquare className="w-5 h-5 fill-slate-950 text-slate-950 shrink-0" />
+            <span>{WHATSAPP_BUTTON_TEXT}</span>
+          </a>
         </div>
       </div>
     </div>

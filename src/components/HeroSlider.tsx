@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { HERO_SLIDES } from '../data/contentData';
-import { ChevronLeft, ChevronRight, ShieldCheck, ArrowRight, GraduationCap, Building2, Landmark, Compass } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShieldCheck, ArrowRight, GraduationCap, Building2, Landmark, Compass, MessageSquare } from 'lucide-react';
 import { PageView } from '../types';
+import { getWhatsAppLink, WHATSAPP_BUTTON_TEXT } from '../constants/whatsapp';
 
 interface HeroSliderProps {
   onNavigate: (view: PageView) => void;
@@ -83,13 +84,15 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ onNavigate, onOpenInquir
 
                 {/* Call To Action Buttons */}
                 <div className="pt-4 flex flex-wrap items-center gap-4">
-                  <button
-                    onClick={onOpenInquiry}
-                    className="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-extrabold text-base sm:text-lg px-8 py-4 rounded-xl shadow-2xl hover:shadow-red-600/30 transition-all duration-300 flex items-center gap-3 border border-red-400/30 transform hover:-translate-y-1"
+                  <a
+                    href={getWhatsAppLink()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-black text-base sm:text-lg px-8 py-4 rounded-xl shadow-2xl hover:shadow-[#25D366]/30 transition-all duration-300 flex items-center gap-3 transform hover:-translate-y-1"
                   >
-                    <span>맞춤 일정 문의</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
+                    <MessageSquare className="w-6 h-6 fill-slate-950 text-slate-950 shrink-0" />
+                    <span>{WHATSAPP_BUTTON_TEXT}</span>
+                  </a>
 
                   <button
                     onClick={() => onNavigate('about')}
