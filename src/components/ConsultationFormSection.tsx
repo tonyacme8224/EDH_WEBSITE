@@ -102,6 +102,12 @@ export const ConsultationFormSection: React.FC<ConsultationFormSectionProps> = (
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setSubmitError('올바른 이메일 주소 형식을 입력해 주세요.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -114,12 +120,25 @@ export const ConsultationFormSection: React.FC<ConsultationFormSectionProps> = (
         data.append('attachment', selectedFile);
       }
 
-      const response = await fetch('/api/inquiries', {
+      // Try Netlify Function endpoint first, fallback to Express /api/inquiries if needed
+      let response = await fetch('/.netlify/functions/submit-inquiry', {
         method: 'POST',
         body: data,
-      });
+      }).catch(() => null);
 
-      const result = await response.json();
+      if (!response || !response.ok) {
+        response = await fetch('/api/inquiries', {
+          method: 'POST',
+          body: data,
+        });
+      }
+
+      let result: any = {};
+      try {
+        result = await response.json();
+      } catch {
+        result = { success: false, message: '상담문의 접수 중 오류가 발생했습니다.' };
+      }
 
       if (result.success) {
         setSubmittedInquiryId(result.inquiryId);
@@ -127,11 +146,11 @@ export const ConsultationFormSection: React.FC<ConsultationFormSectionProps> = (
           onSuccessSubmitted(result.inquiryId);
         }
       } else {
-        setSubmitError(result.message || '상담 접수 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+        setSubmitError(result.message || '상담문의 접수 중 오류가 발생했습니다.');
       }
     } catch (err) {
       console.error('Submission error:', err);
-      setSubmitError('서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+      setSubmitError('상담문의 접수 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }

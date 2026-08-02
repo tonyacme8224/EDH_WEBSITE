@@ -41,12 +41,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToHome, selected
   const fetchInquiries = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/inquiries');
+      let res = await fetch('/.netlify/functions/get-inquiries').catch(() => null);
+      if (!res || !res.ok) {
+        res = await fetch('/api/inquiries');
+      }
       const data = await res.json();
       if (data.success) {
-        setInquiries(data.inquiries);
+        setInquiries(data.inquiries || []);
         if (selectedInquiryId) {
-          const match = data.inquiries.find((i: Inquiry) => i.id === selectedInquiryId);
+          const match = (data.inquiries || []).find((i: Inquiry) => i.id === selectedInquiryId);
           if (match) setSelectedInquiry(match);
         }
       }

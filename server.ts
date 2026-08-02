@@ -4,6 +4,8 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import multer from 'multer';
+import { createClient } from '@supabase/supabase-js';
+import { Resend } from 'resend';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,8 +13,20 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// CORS Header Middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Setup file upload handling with Multer
 const uploadDir = path.join(__dirname, 'data', 'uploads');
@@ -45,7 +59,7 @@ const upload = multer({
   },
 });
 
-// Setup JSON storage file for inquiries
+// Setup JSON storage file for inquiries fallback
 const dataDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -74,10 +88,19 @@ function saveInquiries(inquiries: any[]) {
 
 // Config
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'acme8224@gmail.com';
-const SITE_URL = process.env.SITE_URL || process.env.APP_URL || 'https://ais-dev-dcq4okdx3j6pbv4wf3txna-188009842506.asia-northeast1.run.app';
-const EMAIL_FROM = process.env.EMAIL_FROM || 'Everyday Holidays <noreply@everydayholidays.com>';
+const SITE_URL = process.env.SITE_URL || process.env.APP_URL || 'https://everydayholidays.co.kr';
+const EMAIL_FROM = process.env.EMAIL_FROM || 'Everyday Holidays <onboarding@resend.dev>';
 
-// Create Nodemailer Transporter
+// Initialize Supabase if keys exist
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY;
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+
+// Initialize Resend if key exists
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
+// Create Nodemailer Transporter as fallback
 function createTransporter() {
   if (process.env.SMTP_HOST && process.env.SMTP_USER) {
     return nodemailer.createTransport({
@@ -90,38 +113,25 @@ function createTransporter() {
       },
     });
   }
-  // Fallback to test/sendgrid/gmail transporter if specified
-  if (process.env.EMAIL_API_KEY) {
-    return nodemailer.createTransport({
-      host: 'smtp.sendgrid.net',
-      port: 587,
-      auth: {
-        user: 'apikey',
-        pass: process.env.EMAIL_API_KEY,
-      },
-    });
-  }
   return null;
 }
 
 // Send Admin Email
 async function sendAdminNotificationEmail(inquiry: any) {
-  const transporter = createTransporter();
   const adminDetailLink = `${SITE_URL}/admin?inquiryId=${inquiry.id}`;
-
   const subject = `[Everyday Holidays 신규 상담문의] ${inquiry.companyName} / ${inquiry.contactName}`;
   const html = `
     <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 650px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
-      <div style="border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px;">
-        <h2 style="color: #1e3a8a; margin: 0; font-size: 20px;">Everyday Holidays 신규 B2B 상담문의 접수</h2>
+      <div style="border-bottom: 3px solid #009886; padding-bottom: 15px; margin-bottom: 20px;">
+        <h2 style="color: #009886; margin: 0; font-size: 20px;">Everyday Holidays 신규 B2B 상담문의 접수</h2>
         <p style="color: #64748b; font-size: 13px; margin: 5px 0 0 0;">Singapore Group Travel & MICE Specialist</p>
       </div>
 
-      <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #1e3a8a;">
+      <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #009886;">
         <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #334155;">
           <tr><td style="padding: 6px 0; width: 130px; font-weight: bold;">접수번호:</td><td>${inquiry.id}</td></tr>
           <tr><td style="padding: 6px 0; font-weight: bold;">접수일시:</td><td>${new Date(inquiry.createdAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</td></tr>
-          <tr><td style="padding: 6px 0; font-weight: bold;">회사/기관명:</td><td><strong style="color: #1e3a8a;">${inquiry.companyName}</strong></td></tr>
+          <tr><td style="padding: 6px 0; font-weight: bold;">회사/기관명:</td><td><strong style="color: #009886;">${inquiry.companyName}</strong></td></tr>
           <tr><td style="padding: 6px 0; font-weight: bold;">담당자명:</td><td>${inquiry.contactName}</td></tr>
           <tr><td style="padding: 6px 0; font-weight: bold;">연락처:</td><td>${inquiry.phone}</td></tr>
           <tr><td style="padding: 6px 0; font-weight: bold;">이메일:</td><td><a href="mailto:${inquiry.email}" style="color: #2563eb;">${inquiry.email}</a></td></tr>
@@ -140,22 +150,42 @@ async function sendAdminNotificationEmail(inquiry: any) {
       </div>
 
       <div style="margin-bottom: 25px;">
-        <h4 style="color: #1e3a8a; margin: 0 0 10px 0; font-size: 15px;">상세 문의 내용:</h4>
-        <div style="background-color: #ffffff; border: 1px solid #cbd5e1; padding: 15px; border-radius: 6px; font-size: 14px; line-height: 1.6; color: #1e293b; whitespace: pre-wrap;">
-          ${inquiry.message.replace(/\n/g, '<br/>')}
+        <h4 style="color: #009886; margin: 0 0 10px 0; font-size: 15px;">상세 문의 내용:</h4>
+        <div style="background-color: #ffffff; border: 1px solid #cbd5e1; padding: 15px; border-radius: 6px; font-size: 14px; line-height: 1.6; color: #1e293b; white-space: pre-wrap;">
+          ${inquiry.message}
         </div>
       </div>
 
       <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-        <a href="${adminDetailLink}" target="_blank" style="display: inline-block; background-color: #1e3a8a; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: bold; font-size: 14px;">
+        <a href="${adminDetailLink}" target="_blank" style="display: inline-block; background-color: #009886; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: bold; font-size: 14px;">
           관리자페이지에서 문의 상세 보기
         </a>
       </div>
     </div>
   `;
 
+  if (resend) {
+    try {
+      const res = await resend.emails.send({
+        from: EMAIL_FROM,
+        to: ADMIN_EMAIL,
+        subject,
+        html,
+      });
+      if (res.error) {
+        console.error('[Resend Error - Admin]', res.error);
+        return { success: false, error: res.error.message };
+      }
+      return { success: true };
+    } catch (err: any) {
+      console.error('[Resend Exception - Admin]', err);
+      return { success: false, error: err.message };
+    }
+  }
+
+  const transporter = createTransporter();
   if (!transporter) {
-    console.log(`[EMAIL SIMULATION - ADMIN] Sent to ${ADMIN_EMAIL}:`, subject);
+    console.log(`[EMAIL LOG - ADMIN] Sent to ${ADMIN_EMAIL}:`, subject);
     return { success: true, simulated: true };
   }
 
@@ -166,7 +196,7 @@ async function sendAdminNotificationEmail(inquiry: any) {
       subject,
       html,
     });
-    return { success: true, simulated: false };
+    return { success: true };
   } catch (err: any) {
     console.error('Failed to send admin email:', err);
     return { success: false, error: err.message };
@@ -175,13 +205,11 @@ async function sendAdminNotificationEmail(inquiry: any) {
 
 // Send Customer Confirmation Email
 async function sendCustomerConfirmationEmail(inquiry: any) {
-  const transporter = createTransporter();
-
-  const subject = `[Everyday Holidays] 상담문의가 접수되었습니다`;
+  const subject = `[Everyday Holidays] 상담문의가 정상적으로 접수되었습니다`;
   const html = `
     <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
-      <div style="border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px;">
-        <h2 style="color: #1e3a8a; margin: 0; font-size: 20px;">Everyday Holidays</h2>
+      <div style="border-bottom: 2px solid #009886; padding-bottom: 15px; margin-bottom: 20px;">
+        <h2 style="color: #009886; margin: 0; font-size: 20px;">Everyday Holidays</h2>
         <p style="color: #64748b; font-size: 13px; margin: 4px 0 0 0;">Singapore Group Travel & MICE Specialist</p>
       </div>
 
@@ -196,7 +224,7 @@ async function sendCustomerConfirmationEmail(inquiry: any) {
       </p>
 
       <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; margin: 20px 0;">
-        <h4 style="margin: 0 0 12px 0; color: #1e3a8a; font-size: 14px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px;">접수 기본 정보</h4>
+        <h4 style="margin: 0 0 12px 0; color: #009886; font-size: 14px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px;">접수 기본 정보</h4>
         <table style="width: 100%; font-size: 13px; color: #334155;">
           <tr><td style="padding: 4px 0; width: 120px; font-weight: bold; color: #64748b;">접수번호:</td><td><strong>${inquiry.id}</strong></td></tr>
           <tr><td style="padding: 4px 0; font-weight: bold; color: #64748b;">회사명/기관명:</td><td>${inquiry.companyName}</td></tr>
@@ -217,8 +245,28 @@ async function sendCustomerConfirmationEmail(inquiry: any) {
     </div>
   `;
 
+  if (resend) {
+    try {
+      const res = await resend.emails.send({
+        from: EMAIL_FROM,
+        to: inquiry.email,
+        subject,
+        html,
+      });
+      if (res.error) {
+        console.error('[Resend Error - Customer]', res.error);
+        return { success: false, error: res.error.message };
+      }
+      return { success: true };
+    } catch (err: any) {
+      console.error('[Resend Exception - Customer]', err);
+      return { success: false, error: err.message };
+    }
+  }
+
+  const transporter = createTransporter();
   if (!transporter) {
-    console.log(`[EMAIL SIMULATION - CUSTOMER] Sent to ${inquiry.email}:`, subject);
+    console.log(`[EMAIL LOG - CUSTOMER] Sent to ${inquiry.email}:`, subject);
     return { success: true, simulated: true };
   }
 
@@ -229,15 +277,15 @@ async function sendCustomerConfirmationEmail(inquiry: any) {
       subject,
       html,
     });
-    return { success: true, simulated: false };
+    return { success: true };
   } catch (err: any) {
     console.error('Failed to send customer email:', err);
     return { success: false, error: err.message };
   }
 }
 
-// API Routes
-app.post('/api/inquiries', upload.single('attachment'), async (req, res) => {
+// Shared Submission Handler Function
+const handleInquirySubmission = async (req: express.Request, res: express.Response) => {
   try {
     const {
       companyName,
@@ -260,10 +308,14 @@ app.post('/api/inquiries', upload.single('attachment'), async (req, res) => {
     } = req.body;
 
     if (!companyName || !contactName || !phone || !email || !groupType || !inquiryType || !message || !privacyAgreed) {
-      return res.status(400).json({ success: false, message: '필수 입력 항목을 확인해 주세요.' });
+      return res.status(400).json({ success: false, message: '모든 필수 입력 항목(*)을 입력해 주세요.' });
     }
 
-    // Generate unique inquiry ID (e.g. EH-20260801-9823)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(String(email).trim())) {
+      return res.status(400).json({ success: false, message: '올바른 이메일 형식을 입력해 주세요.' });
+    }
+
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const randomCode = Math.floor(1000 + Math.random() * 9000);
     const inquiryId = `EH-${dateStr}-${randomCode}`;
@@ -274,12 +326,17 @@ app.post('/api/inquiries', upload.single('attachment'), async (req, res) => {
     const newInquiry = {
       id: inquiryId,
       createdAt: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       companyName,
+      company_name: companyName,
       contactName,
+      contact_name: contactName,
       phone,
       email,
       groupType,
+      group_type: groupType,
       inquiryType,
+      inquiry_type: inquiryType,
       estimatedCount: estimatedCount || '',
       startDate: startDate || '',
       duration: duration || '',
@@ -294,128 +351,77 @@ app.post('/api/inquiries', upload.single('attachment'), async (req, res) => {
       attachmentPath,
       status: '신규',
       adminMemo: '',
-      dbSaved: true,
-      adminEmailStatus: 'PENDING',
-      adminEmailError: '',
-      adminEmailSentAt: null,
-      customerEmailStatus: 'PENDING',
-      customerEmailError: '',
-      customerEmailSentAt: null,
     };
 
-    // 1. Save to Database first
+    // 1. Save to Supabase DB if available
+    let savedToSupabase = false;
+    if (supabase) {
+      try {
+        const { error } = await supabase.from('inquiries').insert([newInquiry]);
+        if (error) {
+          console.error('[Supabase Error]', error.message);
+        } else {
+          savedToSupabase = true;
+        }
+      } catch (err: any) {
+        console.error('[Supabase Exception]', err.message);
+      }
+    }
+
+    // Always keep local file fallback
     const inquiries = loadInquiries();
     inquiries.unshift(newInquiry);
     saveInquiries(inquiries);
 
-    // 2. Send Admin Email
-    const adminResult = await sendAdminNotificationEmail(newInquiry);
-    if (adminResult.success) {
-      newInquiry.adminEmailStatus = adminResult.simulated ? 'SENT (SIMULATED)' : 'SENT';
-      newInquiry.adminEmailSentAt = new Date().toISOString();
-    } else {
-      newInquiry.adminEmailStatus = 'FAILED';
-      newInquiry.adminEmailError = adminResult.error || '이메일 전송 실패';
-    }
-
-    // 3. Send Customer Email
-    const customerResult = await sendCustomerConfirmationEmail(newInquiry);
-    if (customerResult.success) {
-      newInquiry.customerEmailStatus = customerResult.simulated ? 'SENT (SIMULATED)' : 'SENT';
-      newInquiry.customerEmailSentAt = new Date().toISOString();
-    } else {
-      newInquiry.customerEmailStatus = 'FAILED';
-      newInquiry.customerEmailError = customerResult.error || '이메일 전송 실패';
-    }
-
-    // Update updated inquiry in DB
-    saveInquiries(inquiries);
+    // 2. Send Emails
+    await sendAdminNotificationEmail(newInquiry);
+    await sendCustomerConfirmationEmail(newInquiry);
 
     return res.json({
       success: true,
       inquiryId,
-      dbSaved: true,
-      adminEmailStatus: newInquiry.adminEmailStatus,
-      customerEmailStatus: newInquiry.customerEmailStatus,
-      message: '상담문의가 정상적으로 접수되었습니다. 담당자가 내용을 검토한 후 연락드리겠습니다.',
+      message: '상담문의가 정상적으로 접수되었습니다.',
     });
   } catch (err: any) {
     console.error('Error handling inquiry POST:', err);
-    return res.status(500).json({ success: false, message: '서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.' });
+    return res.status(500).json({ success: false, message: '상담문의 접수 중 오류가 발생했습니다.' });
   }
-});
+};
+
+// Handle both endpoints
+app.post('/api/inquiries', upload.single('attachment'), handleInquirySubmission);
+app.post('/.netlify/functions/submit-inquiry', upload.single('attachment'), handleInquirySubmission);
 
 // Admin GET List
-app.get('/api/inquiries', (req, res) => {
+const handleGetInquiries = async (_req: express.Request, res: express.Response) => {
+  if (supabase) {
+    try {
+      const { data } = await supabase.from('inquiries').select('*').order('created_at', { ascending: false });
+      if (data && data.length > 0) {
+        return res.json({ success: true, inquiries: data });
+      }
+    } catch (e: any) {
+      console.error('Supabase fetch error:', e.message);
+    }
+  }
   const inquiries = loadInquiries();
   return res.json({ success: true, inquiries });
-});
+};
 
-// Admin Update Status & Memo
-app.patch('/api/inquiries/:id', (req, res) => {
-  const { id } = req.params;
-  const { status, adminMemo } = req.body;
-
-  const inquiries = loadInquiries();
-  const index = inquiries.findIndex((item: any) => item.id === id);
-  if (index === -1) {
-    return res.status(404).json({ success: false, message: '해당 문의를 찾을 수 없습니다.' });
-  }
-
-  if (status) inquiries[index].status = status;
-  if (adminMemo !== undefined) inquiries[index].adminMemo = adminMemo;
-
-  saveInquiries(inquiries);
-  return res.json({ success: true, inquiry: inquiries[index] });
-});
-
-// Admin Resend Email
-app.post('/api/inquiries/:id/resend-email', async (req, res) => {
-  const { id } = req.params;
-  const { target } = req.body; // 'admin' or 'customer'
-
-  const inquiries = loadInquiries();
-  const index = inquiries.findIndex((item: any) => item.id === id);
-  if (index === -1) {
-    return res.status(404).json({ success: false, message: '해당 문의를 찾을 수 없습니다.' });
-  }
-
-  const inquiry = inquiries[index];
-
-  if (target === 'admin') {
-    const result = await sendAdminNotificationEmail(inquiry);
-    if (result.success) {
-      inquiry.adminEmailStatus = result.simulated ? 'SENT (SIMULATED)' : 'SENT';
-      inquiry.adminEmailSentAt = new Date().toISOString();
-      inquiry.adminEmailError = '';
-    } else {
-      inquiry.adminEmailStatus = 'FAILED';
-      inquiry.adminEmailError = result.error || '재발송 실패';
-    }
-  } else if (target === 'customer') {
-    const result = await sendCustomerConfirmationEmail(inquiry);
-    if (result.success) {
-      inquiry.customerEmailStatus = result.simulated ? 'SENT (SIMULATED)' : 'SENT';
-      inquiry.customerEmailSentAt = new Date().toISOString();
-      inquiry.customerEmailError = '';
-    } else {
-      inquiry.customerEmailStatus = 'FAILED';
-      inquiry.customerEmailError = result.error || '재발송 실패';
-    }
-  }
-
-  saveInquiries(inquiries);
-  return res.json({ success: true, inquiry });
-});
+app.get('/api/inquiries', handleGetInquiries);
+app.get('/.netlify/functions/get-inquiries', handleGetInquiries);
 
 // Admin Login Check
-app.post('/api/admin/login', (req, res) => {
+const handleAdminLogin = (req: express.Request, res: express.Response) => {
   const { password } = req.body;
   if (password === 'admin1234' || password === 'everyday1234' || password === 'acme8224') {
     return res.json({ success: true, token: 'auth-token-everyday-holidays' });
   }
   return res.status(401).json({ success: false, message: '비밀번호가 올바르지 않습니다.' });
-});
+};
+
+app.post('/api/admin/login', handleAdminLogin);
+app.post('/.netlify/functions/get-inquiries/login', handleAdminLogin);
 
 // Setup Vite or Static Serving
 async function startServer() {
@@ -428,7 +434,7 @@ async function startServer() {
     app.use(vite.middlewares);
     app.use('*', async (req, res, next) => {
       const url = req.originalUrl;
-      if (url.startsWith('/api')) return next();
+      if (url.startsWith('/api') || url.startsWith('/.netlify')) return next();
       try {
         let template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
         template = await vite.transformIndexHtml(url, template);
@@ -441,7 +447,7 @@ async function startServer() {
   } else {
     app.use(express.static(path.resolve(__dirname, 'dist')));
     app.get('*', (req, res) => {
-      if (req.originalUrl.startsWith('/api')) return;
+      if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/.netlify')) return;
       res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
     });
   }
