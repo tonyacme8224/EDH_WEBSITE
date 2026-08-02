@@ -29,6 +29,7 @@ export const ConsultationFormSection: React.FC<ConsultationFormSectionProps> = (
     replyWishDate: '',
     privacyAgreed: false,
     captchaVerified: false,
+    'bot-field': '',
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -110,47 +111,96 @@ export const ConsultationFormSection: React.FC<ConsultationFormSectionProps> = (
 
     setIsSubmitting(true);
 
-    try {
-      const data = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        data.append(key, String(value));
-      });
+    let netlifyFormSuccess = false;
+    let netlifyFunctionSuccess = false;
+    let inquiryId = `EH-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-      if (selectedFile) {
-        data.append('attachment', selectedFile);
+    try {
+      // 1. Submit to Netlify Forms (URL Encoded)
+      try {
+        const netlifyPayload: Record<string, any> = {
+          'form-name': 'inquiry',
+          companyName: formData.companyName,
+          contactName: formData.contactName,
+          phone: formData.phone,
+          email: formData.email,
+          groupType: formData.groupType,
+          inquiryType: formData.inquiryType,
+          estimatedCount: formData.estimatedCount,
+          startDate: formData.startDate,
+          duration: formData.duration,
+          preferredProgram: formData.preferredProgram,
+          targetInstitution: formData.targetInstitution,
+          budget: formData.budget,
+          isBidding: formData.isBidding ? '예' : '아니오',
+          biddingDeadline: formData.biddingDeadline,
+          replyWishDate: formData.replyWishDate,
+          message: formData.message,
+          privacyAgreed: formData.privacyAgreed ? '동의' : '미동의',
+          'bot-field': formData['bot-field'] || '',
+        };
+
+        const encodedBody = Object.keys(netlifyPayload)
+          .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(netlifyPayload[key] ?? ''))
+          .join('&');
+
+        const netlifyRes = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: encodedBody,
+        }).catch(() => null);
+
+        if (netlifyRes && (netlifyRes.ok || netlifyRes.status === 200 || netlifyRes.status === 302)) {
+          netlifyFormSuccess = true;
+        }
+      } catch (err) {
+        console.warn('Netlify Forms submission warning:', err);
       }
 
-      // Try Netlify Function endpoint first, fallback to Express /api/inquiries if needed
-      let response = await fetch('/.netlify/functions/submit-inquiry', {
-        method: 'POST',
-        body: data,
-      }).catch(() => null);
+      // 2. Submit to Netlify Function (Database & Resend Emails)
+      try {
+        const data = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          data.append(key, String(value));
+        });
 
-      if (!response || !response.ok) {
-        response = await fetch('/api/inquiries', {
+        if (selectedFile) {
+          data.append('attachment', selectedFile);
+        }
+
+        let response = await fetch('/.netlify/functions/submit-inquiry', {
           method: 'POST',
           body: data,
-        });
+        }).catch(() => null);
+
+        if (!response || !response.ok) {
+          response = await fetch('/api/inquiries', {
+            method: 'POST',
+            body: data,
+          }).catch(() => null);
+        }
+
+        if (response && response.ok) {
+          const result = await response.json().catch(() => null);
+          if (result && result.success) {
+            netlifyFunctionSuccess = true;
+            if (result.inquiryId) {
+              inquiryId = result.inquiryId;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Netlify Function submission warning:', err);
       }
 
-      let result: any = {};
-      try {
-        result = await response.json();
-      } catch {
-        result = { success: false, message: '상담문의 접수 중 오류가 발생했습니다.' };
-      }
-
-      if (result.success) {
-        setSubmittedInquiryId(result.inquiryId);
+      if (netlifyFormSuccess || netlifyFunctionSuccess) {
+        setSubmittedInquiryId(inquiryId);
         if (onSuccessSubmitted) {
-          onSuccessSubmitted(result.inquiryId);
+          onSuccessSubmitted(inquiryId);
         }
       } else {
-        setSubmitError(result.message || '상담문의 접수 중 오류가 발생했습니다.');
+        setSubmitError('상담문의 접수 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
       }
-    } catch (err) {
-      console.error('Submission error:', err);
-      setSubmitError('상담문의 접수 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -223,7 +273,25 @@ export const ConsultationFormSection: React.FC<ConsultationFormSectionProps> = (
           </div>
         ) : (
           /* Form Screen */
-          <form onSubmit={handleSubmit} className="bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-2xl space-y-8">
+          <form
+            name="inquiry"
+            method="POST"
+            data-netlify="true"
+            netlify-honeypot="bot-field"
+            onSubmit={handleSubmit}
+            className="bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-2xl space-y-8"
+          >
+            <input type="hidden" name="form-name" value="inquiry" />
+            <p hidden style={{ display: 'none' }}>
+              <label>
+                입력하지 마세요:
+                <input
+                  name="bot-field"
+                  value={formData['bot-field'] || ''}
+                  onChange={handleInputChange}
+                />
+              </label>
+            </p>
             
             {/* Mandatory Fields Group */}
             <div>

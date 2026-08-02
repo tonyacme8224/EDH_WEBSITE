@@ -6,6 +6,34 @@
     <title>My Google AI Studio App</title>
   </head>
   <body>
+    <!-- Hidden static form for Netlify Forms detection -->
+    <form
+      name="inquiry"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="inquiry" />
+      <input name="companyName" />
+      <input name="contactName" />
+      <input name="phone" />
+      <input name="email" />
+      <input name="groupType" />
+      <input name="inquiryType" />
+      <input name="estimatedCount" />
+      <input name="startDate" />
+      <input name="duration" />
+      <input name="preferredProgram" />
+      <input name="targetInstitution" />
+      <input name="budget" />
+      <input name="isBidding" />
+      <input name="biddingDeadline" />
+      <input name="replyWishDate" />
+      <textarea name="message"></textarea>
+      <input name="privacyAgreed" />
+      <input name="bot-field" />
+    </form>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
